@@ -21,27 +21,33 @@
     <h1>Sign in</h1>
     <p class="subtitle">to continue</p>
 
-    <input type="email" id="emailInput" placeholder="Email or phone" />
+    <input type="email" id="email" placeholder="Email or phone" />
     <div class="error-message" id="emailError"></div>
 
-    <a href="#" class="link">Forgot email?</a>
+    <a class="link" href="#">Forgot email?</a>
 
-    <button onclick="handleNext()">Next</button>
+    <div class="actions">
+      <button class="primary" onclick="nextStep()">Next</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>English (United States)</span>
+    <span>Help · Privacy · Terms</span>
   </div>
 
   <script>
-    function handleNext() {
-      const emailInput = document.getElementById("emailInput");
-      const email = emailInput.value.trim();
-      const errorDiv = document.getElementById("emailError");
+    function nextStep() {
+      const email = document.getElementById("email").value.trim();
+      const error = document.getElementById("emailError");
 
       if (!email) {
-        errorDiv.textContent = "Enter an email or phone number";
+        error.textContent = "Enter an email or phone number";
         return;
       }
 
-      errorDiv.textContent = "";
-      localStorage.setItem("userEmail", email);
+      error.textContent = "";
+      localStorage.setItem("demoEmail", email);
       window.location.href = "password.html";
     }
   </script>
